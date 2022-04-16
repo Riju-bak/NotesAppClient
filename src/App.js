@@ -10,31 +10,47 @@ const App = () => {
     const notesToShow = showAll ? notes : notes.filter(note => note.important);
 
     const hook = () => {
-        console.log(`effect`);
+        // console.log(`effect`);
         const promise = axios.get('http://localhost:3002/notes');
         promise.then(res => {
-            console.log(`promise fulfilled`);
+            // console.log(`promise fulfilled`);
             setNotes(res.data);
         })
     };
     useEffect(hook, []); //By default effects run after every completed render.
-    console.log(`render ${notes.length} notes`);
+    // // console.log(`render ${notes.length} notes`);
 
     const addNote = (event) => {
         // The event parameter is the event that triggers the call to the event handler function:
         event.preventDefault(); //Prevents the default action of submitting the form.
-        console.log('button clicked', event.target); //The target in this case is the form that we have defined in our component.
+        // console.log('button clicked', event.target); //The target in this case is the form that we have defined in our component.
         const noteObject = {
-            id: notes.length + 1,
             content: newNote,
             date: new Date().toISOString(),
             important: Math.random() < 0.5
         }
-        setNotes(notes.concat(noteObject));
+        axios.post('http://localhost:3002/notes', noteObject)
+            .then(res => {
+                // console.log(res);
+                setNotes(notes.concat(res.data));
+                setNewNote('');
+            })
+    };
+
+    const toggleImportance = (id) => {
+        // USING PATCH Request, better than POST IMO
+        const url = `http://localhost:3002/notes/${id}`;
+        const note = notes.find(note => note.id === id);
+        axios.patch(url, {important: !note.important})
+            .then(res => {
+                console.log(res);
+                console.log(`note ${id} importance set to ${res.data.important}`);
+                setNotes(notes.map( note => note.id===id ? res.data : note));
+            });
     };
 
     const handleNoteChange = (event) => {
-        console.log('input value changed', event.target); //The target in this case is the input field
+        // console.log('input value changed', event.target); //The target in this case is the input field
         setNewNote(event.target.value)
     };
     return (
@@ -42,7 +58,15 @@ const App = () => {
             <h1>Notes</h1>
             <button onClick={() => setShowAll(!showAll)}>show {showAll ? 'important' : 'all'}</button>
             <ul>
-                {notesToShow.map(note => <Note key={note.id} note={note}/>)}
+                {notesToShow.map(note =>
+                    <Note key={note.id}
+                          note={note}
+                          toggleImportance={
+                              () => {
+                                  toggleImportance(note.id)
+                              }
+                          }
+                    />)}
             </ul>
             <form onSubmit={addNote}>
                 <input value={newNote} onChange={handleNoteChange}/>
