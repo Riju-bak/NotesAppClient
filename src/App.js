@@ -1,20 +1,22 @@
 import {useState, useEffect} from "react";
 import Note from "./components/Note";
-import axios from "axios";
+import noteService from "./services/notes";
+import Notification from "./components/Notification";
 
 const App = () => {
     const [notes, setNotes] = useState([]);
     const [newNote, setNewNote] = useState('a new note...');
     const [showAll, setShowAll] = useState(true);
+    const [errorMessage, setErrorMessage] = useState(null);
 
     const notesToShow = showAll ? notes : notes.filter(note => note.important);
 
     const hook = () => {
         // console.log(`effect`);
-        const promise = axios.get('http://localhost:3002/notes');
-        promise.then(res => {
+        const promise = noteService.getAll();
+        promise.then(initialNotes => {
             // console.log(`promise fulfilled`);
-            setNotes(res.data);
+            setNotes(initialNotes);
         })
     };
     useEffect(hook, []); //By default effects run after every completed render.
@@ -29,23 +31,28 @@ const App = () => {
             date: new Date().toISOString(),
             important: Math.random() < 0.5
         }
-        axios.post('http://localhost:3002/notes', noteObject)
-            .then(res => {
+        noteService.create(noteObject)
+            .then(returnedNote => {
                 // console.log(res);
-                setNotes(notes.concat(res.data));
+                setNotes(notes.concat(returnedNote));
                 setNewNote('');
             })
     };
 
     const toggleImportance = (id) => {
-        // USING PATCH Request, better than POST IMO
-        const url = `http://localhost:3002/notes/${id}`;
+        // Update USING POST Request, not as good as PATCH IMO
         const note = notes.find(note => note.id === id);
-        axios.patch(url, {important: !note.important})
-            .then(res => {
-                console.log(res);
-                console.log(`note ${id} importance set to ${res.data.important}`);
-                setNotes(notes.map( note => note.id===id ? res.data : note));
+        const changedNote = {...note, important: !note.important}
+        noteService.update(id, changedNote)
+            .then(returnedNote => {
+                // console.log(returnedNote);
+                console.log(`note ${id} importance set to ${returnedNote.important}`);
+                setNotes(notes.map( note => note.id===id ? returnedNote : note));
+            })
+            .catch( error => {
+                setErrorMessage(`Note "${note.content}" already deleted from server`);
+                setTimeout(() => {setErrorMessage(null)}, 5000);
+                setNotes(notes.filter(note => note.id !== id));
             });
     };
 
@@ -56,6 +63,7 @@ const App = () => {
     return (
         <>
             <h1>Notes</h1>
+            <Notification message={errorMessage}/>
             <button onClick={() => setShowAll(!showAll)}>show {showAll ? 'important' : 'all'}</button>
             <ul>
                 {notesToShow.map(note =>
