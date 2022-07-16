@@ -1,6 +1,12 @@
 import axios from "axios";
 const baseUrl = `/api/notes`;
 
+let token;
+
+const setToken = (t) => {
+    token = `Bearer ${t}`;
+}
+
 const getAll = () => {
     const request = axios.get(baseUrl);
     const nonExisting = {
@@ -14,8 +20,12 @@ const getAll = () => {
     //This is called promise chaining
 }
 
+
 const create = (newObject) => {
-    const request = axios.post(baseUrl, newObject);
+    const config = {
+        headers: {Authorization: token}
+    };
+    const request = axios.post(baseUrl, newObject, config);
     return request.then(res => res.data);
 }
 
@@ -25,8 +35,10 @@ const update = (id, newObject) => {
     return request.then(res => res.data);
 }
 
-export default {
+const exportObj = {
     getAll: getAll,
     create: create,
-    update: update
-}
+    update: update,
+    setToken
+};
+export default exportObj;
