@@ -53,9 +53,15 @@ const App = () => {
                 setNotes(notes.concat(returnedNote));
                 setNewNote('');
             })
+            .catch(error => {
+                setErrorMessage(error.response.data.error);
+                setTimeout(() => {
+                    setErrorMessage(null)
+                }, 5000);
+            });
     };
 
-    const toggleImportance = (id) => {
+    const toggleImportanceOf = (id) => {
         // Update USING POST Request, not as good as PATCH IMO
         const note = notes.find(note => note.id === id);
         const changedNote = {...note, important: !note.important}
@@ -89,8 +95,8 @@ const App = () => {
         try {
             const user = await loginService.login(credentials);
             window.localStorage.setItem('loggedNoteappUser', JSON.stringify(user));
-            setUser(user);
             noteService.setToken(user.token);
+            setUser(user);
             setUsername("");
             setPassword("");
         } catch (e) {
@@ -106,46 +112,104 @@ const App = () => {
         setUser(null);
     }
 
-    const loginForm = () => {
-        return (
-            <LoginForm onSubmit={handleLogin} value={username} onChange={({target}) => {
-                setUsername(target.value)
-            }} value1={password} onChange1={({target}) => {
-                setPassword(target.value)
-            }}/>
-        );
-    };
+    // const loginForm = () => {
+    //     return (
+    //         <LoginForm onSubmit={handleLogin} value={username} onChange={({target}) => {
+    //             setUsername(target.value)
+    //         }} value1={password} onChange1={({target}) => {
+    //             setPassword(target.value)
+    //         }}/>
+    //     );
+    // };
 
 
-    const notesForm = () => {
-        return (
-            <NotesForm onSubmit={addNote} value={newNote} onChange={handleNoteChange}/>
-        );
-    };
+    // const notesForm = () => {
+    //     return (
+    //         <NotesForm onSubmit={addNote} value={newNote} onChange={handleNoteChange}/>
+    //     );
+    // };
 
-    const notesView = () => {
-        return (
+    // const notesView = () => {
+    //     return (
+    //         <div>
+    //             <button onClick={handleLogout}>Logout</button>
+    //             <NotesView user={user} onClick={() => setShowAll(!showAll)} showAll={showAll} notesToShow={notesToShow}
+    //                        callbackfn={note =>
+    //                            <Note key={note.id}
+    //                                  note={note}
+    //                                  toggleImportance={
+    //                                      () => {
+    //                                          toggleImportance(note.id)
+    //                                      }
+    //                                  }
+    //                            />} notesForm={notesForm()}/>
+    //         </div>
+    //     )
+    // }
+
+    const loginForm = () => (
+        <form onSubmit={handleLogin}>
             <div>
-                <button onClick={handleLogout}>Logout</button>
-                <NotesView user={user} onClick={() => setShowAll(!showAll)} showAll={showAll} notesToShow={notesToShow}
-                           callbackfn={note =>
-                               <Note key={note.id}
-                                     note={note}
-                                     toggleImportance={
-                                         () => {
-                                             toggleImportance(note.id)
-                                         }
-                                     }
-                               />} notesForm={notesForm()}/>
+                username
+                <input
+                    type={"text"}
+                    value={username}
+                    name="Username"
+                    onChange={({target}) => {
+                        setUsername(target.value)
+                    }}
+                />
             </div>
-        )
-    }
+            <div>
+                password
+                <input
+                    type="password"
+                    value={password}
+                    name="Password"
+                    onChange={({target}) => {
+                        setPassword(target.value)
+                    }}
+                />
+            </div>
+            <button type={"submit"}>login</button>
+        </form>
+    );
+
+    const noteForm = () => (
+        <form onSubmit={addNote}>
+            <input
+                value={newNote}
+                onChange={handleNoteChange}
+            />
+            <button type={"submit"}>save</button>
+        </form>
+    )
 
     return (
         <>
             <h1>Notes</h1>
             <Notification message={errorMessage}/>
-            {user === null ? loginForm() : notesView()}
+            {user === null ?
+                loginForm() :
+                <div>
+                    <p>{user.name} logged in</p>
+                    {noteForm()}
+                    <div>
+                        <button onClick={() => {setShowAll(!showAll)}}>
+                            show {showAll ? 'important' : 'all'}
+                        </button>
+                    </div>
+                    <ul>
+                        {notesToShow.map(note =>
+                            <Note
+                                key={note.id}
+                                note={note}
+                                toggleImportance={() => {toggleImportanceOf(note.id)}}
+                            />
+                        )}
+                    </ul>
+                </div>
+            }
         </>);
 }
 
