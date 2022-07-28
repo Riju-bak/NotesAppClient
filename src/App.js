@@ -4,8 +4,6 @@ import noteService from "./services/notes";
 import Notification from "./components/Notification";
 import loginService from "./services/login";
 import LoginForm from "./components/LoginForm";
-import NotesForm from "./components/NotesForm";
-import NotesView from "./components/NotesView";
 
 const App = () => {
     const [notes, setNotes] = useState([]);
@@ -15,6 +13,7 @@ const App = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [user, setUser] = useState(null);
+    const [loginVisible, setVisible] = useState(false);
 
     const notesToShow = showAll ? notes : notes.filter(note => note.important);
 
@@ -112,68 +111,23 @@ const App = () => {
         setUser(null);
     }
 
-    // const loginForm = () => {
-    //     return (
-    //         <LoginForm onSubmit={handleLogin} value={username} onChange={({target}) => {
-    //             setUsername(target.value)
-    //         }} value1={password} onChange1={({target}) => {
-    //             setPassword(target.value)
-    //         }}/>
-    //     );
-    // };
-
-
-    // const notesForm = () => {
-    //     return (
-    //         <NotesForm onSubmit={addNote} value={newNote} onChange={handleNoteChange}/>
-    //     );
-    // };
-
-    // const notesView = () => {
-    //     return (
-    //         <div>
-    //             <button onClick={handleLogout}>Logout</button>
-    //             <NotesView user={user} onClick={() => setShowAll(!showAll)} showAll={showAll} notesToShow={notesToShow}
-    //                        callbackfn={note =>
-    //                            <Note key={note.id}
-    //                                  note={note}
-    //                                  toggleImportance={
-    //                                      () => {
-    //                                          toggleImportance(note.id)
-    //                                      }
-    //                                  }
-    //                            />} notesForm={notesForm()}/>
-    //         </div>
-    //     )
-    // }
-
-    const loginForm = () => (
-        <form onSubmit={handleLogin}>
+    const loginForm = () => {
+        const hideWhenVisible = {display: loginVisible ? 'none' : ''};
+        const showWhenVisible = {display: loginVisible ? '' : 'none'};
+        return (
             <div>
-                username
-                <input
-                    type={"text"}
-                    value={username}
-                    name="Username"
-                    onChange={({target}) => {
-                        setUsername(target.value)
-                    }}
-                />
-            </div>
-            <div>
-                password
-                <input
-                    type="password"
-                    value={password}
-                    name="Password"
-                    onChange={({target}) => {
+                <LoginForm
+                    handleSubmit={handleLogin}
+                    username={username}
+                    handleUsernameChange={({target}) => {setUsername(target.value)}}
+                    password={password}
+                    handlePasswordChange={({target}) => {
                         setPassword(target.value)
                     }}
                 />
             </div>
-            <button type={"submit"}>login</button>
-        </form>
-    );
+        )
+    };
 
     const noteForm = () => (
         <form onSubmit={addNote}>
@@ -195,7 +149,9 @@ const App = () => {
                     <p>{user.name} logged in</p>
                     {noteForm()}
                     <div>
-                        <button onClick={() => {setShowAll(!showAll)}}>
+                        <button onClick={() => {
+                            setShowAll(!showAll)
+                        }}>
                             show {showAll ? 'important' : 'all'}
                         </button>
                     </div>
@@ -204,7 +160,9 @@ const App = () => {
                             <Note
                                 key={note.id}
                                 note={note}
-                                toggleImportance={() => {toggleImportanceOf(note.id)}}
+                                toggleImportance={() => {
+                                    toggleImportanceOf(note.id)
+                                }}
                             />
                         )}
                     </ul>

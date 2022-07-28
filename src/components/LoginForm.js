@@ -1,35 +1,34 @@
-import * as PropTypes from "prop-types";
+const LoginForm = ({
+                       handleSubmit,
+                       handleUsernameChange,
+                       handlePasswordChange,
+                       username,
+                       password
+                   }) => {
+    return (
+        <div>
+            <h2>Login</h2>
 
-function LoginForm(props) {
-    return <form onSubmit={props.onSubmit}>
-        <div>
-            username
-            <input
-                type="text"
-                value={props.value}
-                name="Username"
-                onChange={props.onChange}
-            />
+            <form onSubmit={handleSubmit}>
+                <div>
+                    username
+                    <input
+                        value={username}
+                        onChange={handleUsernameChange}
+                    />
+                </div>
+                <div>
+                    password
+                    <input
+                        type="password"
+                        value={password}
+                        onChange={handlePasswordChange}
+                    />
+                </div>
+                <button type="submit">login</button>
+            </form>
         </div>
-        <div>
-            password
-            <input
-                type="text"
-                value={props.value1}
-                name="Password"
-                onChange={props.onChange1}
-            />
-        </div>
-        <button type="submit">login</button>
-    </form>;
+    )
 }
 
-LoginForm.propTypes = {
-    onSubmit: PropTypes.func,
-    value: PropTypes.string,
-    onChange: PropTypes.func,
-    value1: PropTypes.string,
-    onChange1: PropTypes.func
-};
-
-export default LoginForm;
+export default LoginForm
