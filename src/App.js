@@ -13,7 +13,7 @@ const App = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [user, setUser] = useState(null);
-    const [loginVisible, setVisible] = useState(false);
+    const [loginVisible, setLoginVisible] = useState(false);
 
     const notesToShow = showAll ? notes : notes.filter(note => note.important);
 
@@ -116,15 +116,21 @@ const App = () => {
         const showWhenVisible = {display: loginVisible ? '' : 'none'};
         return (
             <div>
-                <LoginForm
-                    handleSubmit={handleLogin}
-                    username={username}
-                    handleUsernameChange={({target}) => {setUsername(target.value)}}
-                    password={password}
-                    handlePasswordChange={({target}) => {
-                        setPassword(target.value)
-                    }}
-                />
+                <div style={hideWhenVisible}>
+                    <button onClick={() => {setLoginVisible(true)}}>log in</button>
+                </div>
+                <div style={showWhenVisible}>
+                    <LoginForm
+                        handleSubmit={handleLogin}
+                        username={username}
+                        handleUsernameChange={({target}) => {setUsername(target.value)}}
+                        password={password}
+                        handlePasswordChange={({target}) => {
+                            setPassword(target.value)
+                        }}
+                    />
+                    <button onClick={() => {setLoginVisible(false)}}>cancel</button>
+                </div>
             </div>
         )
     };
