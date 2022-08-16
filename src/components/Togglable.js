@@ -26,7 +26,9 @@ const Togglable = forwardRef((props, refs) => {
                 <div style={hideWhenVisible}>
                     <button onClick={toggleVisibility}>{props.buttonLabel}</button>
                 </div>
-                <div style={showWhenVisible}>
+                {/*togglableContent below is a dummy css class just for testing,
+                it isn't actually defined in index.css*/}
+                <div style={showWhenVisible} className={'togglableContent'}>
                     {props.children}
                 </div>
                 <div style={showWhenVisible}>
